@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 printNumbers = False
 
 # Taille de la grille
-n_rows, n_cols = 256, 256
+n_rows, n_cols = 32, 32
 
 # Créez la grille et initialisez les températures initiales
 grid = np.zeros((n_rows, n_cols))
@@ -13,24 +13,13 @@ boolean_grid = np.full((n_rows, n_cols), True, dtype=bool)
 
 
 #zones infinies
-### gauche droite ###
-grid[:, :1] = 100     # Zone chaude
-boolean_grid[:, :1] = False
-grid[:, -1] = -100    # Zone froide
-boolean_grid[:, -1] = False
+# grid[:, :1] = 100     # Zone chaude
+# boolean_grid[:, :1] = False
+# grid[:, -1] = -50    # Zone froide
+# boolean_grid[:, -1] = False
+grid[15:17, 15:17] = 100
+boolean_grid[15:17, 15:17] = False
 
-### centre ###
-# grid[15:17, 15:17] = 100
-# boolean_grid[15:17, 15:17] = False
-
-### coins ###
-# grid[0,0] = 100
-# boolean_grid[0,0] = False
-# grid[-1,-1] = -100
-# boolean_grid[-1,-1] = False
-
-np.set_printoptions(precision=2, suppress=True)
-print(grid)
 
 # Matrice de propagation pour un matériau
 propagation_matrix = np.array([[1/36, 4/36, 1/36],  # faible propagation
@@ -86,7 +75,8 @@ cmap = plt.get_cmap('coolwarm')
 
 # Affichez la grille avec une carte de couleur à chaque itération
 for grid, iteration in simulate_heat_diffusion(grid, propagation_matrix, iterations):
-    plt.imshow(grid[0:n_rows, 0:n_cols - 0], cmap=cmap, interpolation='nearest')
+    # plt.imshow(grid[1:n_rows-1, 1:n_cols-1], cmap=cmap, interpolation='nearest')    # n'affiche pas les bords
+    plt.imshow(grid[0:n_rows, 0:n_cols - 0], cmap=cmap, interpolation='nearest')    # affiche les bords
     plt.colorbar()
     plt.text(0.05, 0.05, f'Iteration: {iteration}', transform=plt.gca().transAxes, color='white')
     if(printNumbers):
