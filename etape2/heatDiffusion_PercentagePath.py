@@ -70,14 +70,24 @@ def heat_simulation_on(i, j):
 
 # Fonction de simulation de diffusion de chaleur
 def simulate_heat_diffusion(propagation_matrix, iterations):
+    indexgrid = np.zeros((n_rows, n_cols))
+    num_loops_rows = (n_rows - propagation_matrix.shape[0]) // (propagation_matrix.shape[0] - 1) + 1
+    num_loops_cols = (n_cols - propagation_matrix.shape[1]) // (propagation_matrix.shape[1] - 1) + 1
     for iteration in range(iterations):
-        for i in range(n_rows):
-            for j in range(n_cols):
-                if (material_grid[i,j]!=0): # if is allowed to be replaced
-                    heat_simulation_on(i,j) 
-                    
-                    
-        print(new_grid)
+        # index=0 # pour verifier si le tableaux est parcourus correctement
+        for i in range(propagation_matrix.shape[0]):
+            for j in range(propagation_matrix.shape[1]):
+                for I in range(num_loops_rows):
+                    for J in range(num_loops_cols):
+                        x = I*propagation_matrix.shape[0]+i
+                        y = J*propagation_matrix.shape[1]+j
+                        if x> n_rows-1 or y> n_cols-1:
+                            continue
+                        # index += 1
+                        # indexgrid[x,y]=index
+                        if (material_grid[x,y]!=0): # if is allowed to be replaced
+                            heat_simulation_on(x,y) 
+        print(indexgrid)
         grid = np.copy(new_grid)  # Mettez à jour la grille d'origine avec les nouvelles valeurs
         yield grid, iteration   # renvoie une version mise à jour de la grille à chaque étape du for
 
