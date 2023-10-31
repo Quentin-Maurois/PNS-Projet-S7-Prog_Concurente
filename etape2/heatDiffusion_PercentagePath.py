@@ -1,7 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import argparse
 
-printNumbers = True
+# Création d'un analyseur d'arguments
+parser = argparse.ArgumentParser(description='diffusion de la chaleur ponderer avec des pourcentages.')
+
+# Ajout d'arguments
+parser.add_argument('--caseValue', type=int, help='Affiche dans chaque case de la map (0) la temperature - (1) les pourcentages - (-1) rien')
+parser.add_argument('--demo', type=int, help='proposition de demo (0) ')
+parser.add_argument('--iterations', type=int, help='choisissez le nombre d\'iteration maximale a effectue')
+
+# Analyse des arguments de ligne de commande
+args = parser.parse_args()
+
+printNumbers = -1
+
+# Nombre d'itérations de simulation
+iterations = 1000
 
 # Taille de la grille
 n_rows, n_cols = 9, 5
@@ -15,7 +30,56 @@ material_grid = np.ones(grid.shape)
 # ici la moitie superieur est beaucoup moins sensible a la propagation de chaleur
 grid[4, :] = 100     # Zone chaude
 material_grid[4, :] = 0     # Zone chaude
-material_grid[:3,:] = 0.1
+material_grid[:4,:] = 0.1 # la partie superieur de la map est moins affecte par la diffusion de chaleur
+
+# Utilisation des arguments
+if args.caseValue is not None:
+    print("caseValue :", args.caseValue)
+    if -2 < args.caseValue and args.caseValue < 2:
+        printNumbers = args.caseValue
+    else :
+        print("valeur non valide")
+
+if args.demo is not None:
+    print("demo :", args.demo)
+    if args.demo == 0:
+        # Taille de la grille
+        n_rows, n_cols = 16, 16
+        
+        # Créez la grille et initialisez les températures initiales
+        grid = np.zeros((n_rows, n_cols))
+        
+        #zones infinies
+        material_grid = np.ones(grid.shape)
+        
+        # ici la moitie superieur est beaucoup moins sensible a la propagation de chaleur
+        grid[:, :] = 100     # Zone chaude
+        grid[1:-1, 1:-1] = 0     # Zone neutre
+        grid[7:8, 7:8] = -100     # Zone froide
+        material_grid[:,:] = 0     # Zone chaude static
+        material_grid[:-1, 1:-1] = 1     # Zone froide static
+    if args.demo == 1:
+        # Taille de la grille
+        n_rows, n_cols = 6, 6
+        
+        # Créez la grille et initialisez les températures initiales
+        grid = np.zeros((n_rows, n_cols))
+        
+        #zones infinies
+        material_grid = np.ones(grid.shape)
+        
+        # ici la moitie superieur est beaucoup moins sensible a la propagation de chaleur
+        grid[0, :] = 100     # Zone chaude
+        grid[-1, :] = -100     # Zone froide
+        material_grid[:, :1] = 1     # colonne chaude facile
+        material_grid[:, -2:] = 1     # colonne froide facile
+        material_grid[0, :] = 0     # Zone chaude static
+        material_grid[-1, :] = 0     # Zone froide static
+        material_grid[1:-1, 2:-2] = 0.01     # No temperatures land
+
+if args.iterations is not None and not np.nan(args.iterations):
+        iterations = args.iterations
+        
 
 # ici on peut voir que comme les cases froide sont dans un materiau plus sensible a la diffusion de chaleur, leur changement de temperature sera plus marqué que les cases chaude qui sont dans un materiaux moins sensible a la diffusion de chaleur
 # grid[:, :1] = 100     # Zone chaude
@@ -37,8 +101,7 @@ def update_value(i, j, value):
         return
     percent = material_grid[i,j]
     current = grid[i,j]
-    # DISCLAIMER : j'ai l'impression que ma formule a plus d'influence sur les pourcentage entre 0 et 100 que sur les pourcentage >100 (cad: 0.5 va avoir un plus grand impacte sur la difference de diffusion de chaleur que 10, alors que dans un cas c'est 2x moins fort et dans l'autre c'est 10x plus fort)
-    new_grid[i,j] = (current+value*percent)/(1+percent)
+    new_grid[i,j] += (value-current)*percent
     
 def heat_simulation_on(i, j):
     neighborhood = grid[max(0, i - 1):min(n_rows, i + 2), max(0, j - 1):min(n_cols, j + 2)] # neighborhood de taille variable : min (2,2) et max (3,3)
@@ -70,11 +133,11 @@ def heat_simulation_on(i, j):
 
 # Fonction de simulation de diffusion de chaleur
 def simulate_heat_diffusion(propagation_matrix, iterations):
-    indexgrid = np.zeros((n_rows, n_cols))
+    # indexgrid = np.zeros((n_rows, n_cols)) # pour verifier si le tableaux est parcourus correctement
     num_loops_rows = (n_rows - propagation_matrix.shape[0]) // (propagation_matrix.shape[0] - 1) + 1
     num_loops_cols = (n_cols - propagation_matrix.shape[1]) // (propagation_matrix.shape[1] - 1) + 1
     for iteration in range(iterations):
-        # index=0 # pour verifier si le tableaux est parcourus correctement
+        # index=0
         for i in range(propagation_matrix.shape[0]):
             for j in range(propagation_matrix.shape[1]):
                 for I in range(num_loops_rows):
@@ -87,36 +150,30 @@ def simulate_heat_diffusion(propagation_matrix, iterations):
                         # indexgrid[x,y]=index
                         if (material_grid[x,y]!=0): # if is allowed to be replaced
                             heat_simulation_on(x,y) 
-        print(indexgrid)
+        # print(indexgrid)
         grid = np.copy(new_grid)  # Mettez à jour la grille d'origine avec les nouvelles valeurs
         yield grid, iteration   # renvoie une version mise à jour de la grille à chaque étape du for
 
-# Nombre d'itérations de simulation
-iterations = 10000
 
 cmap = plt.get_cmap('coolwarm')
 
 # Affichez la grille avec une carte de couleur à chaque itération
 for grid, iteration in simulate_heat_diffusion(propagation_matrix, iterations):
-    # plt.imshow(grid[1:n_rows-1, 1:n_cols-1], cmap=cmap, interpolation='nearest')    # n'affiche pas les bords
-    plt.imshow(grid[0:n_rows, 0:n_cols - 0], cmap=cmap, interpolation='nearest')    # affiche les bords
+    plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation='nearest')
     plt.colorbar()
     plt.text(0.05, 0.05, f'Iteration: {iteration}', transform=plt.gca().transAxes, color='white')
-    if(printNumbers):
-        for i in range(0, n_rows ):
-            for j in range(0, n_cols ):
-                plt.text(j , i , f'{int(grid[i, j])}°C', color='black', fontsize=8, ha='center', va='center')
+    if printNumbers!=-1:
+        for i in range(0, n_rows):
+            for j in range(0, n_cols):
+                if printNumbers==0:
+                    plt.text(j, i, f'{int(grid[i, j])}°C', color='black', fontsize=8, ha='center', va='center')
+                elif printNumbers==1:
+                    plt.text(j, i, f'{int(material_grid[i, j]*100)}%', color='black', fontsize=8, ha='center', va='center')
     plt.pause(0.001)  # Ajoutez une pause entre les itérations (ajustez selon vos besoins)
     # input("Appuyez sur Entrée pour continuer...") # attends la validation de l'utilisateur
     plt.clf()  # Effacez le graphique précédent pour la mise à jour
 
 # Affichage de la fenêtre
-plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation='nearest')
-plt.colorbar()
-plt.text(0.05, 0.05, f'Iteration: {iterations}', transform=plt.gca().transAxes, color='white')
-if (printNumbers):
-    for i in range(0, n_rows):
-        for j in range(0, n_cols):
-            plt.text(j, i, f'{int(grid[i, j])}°C', color='black', fontsize=8, ha='center', va='center')
+                
 plt.pause(-1)
 plt.plot()
