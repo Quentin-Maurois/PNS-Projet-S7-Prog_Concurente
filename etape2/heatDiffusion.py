@@ -1,55 +1,72 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import materialSelectionFunction
 
 printNumbers = False
+np.set_printoptions(precision=2, suppress=True)
+
 
 # Taille de la grille
-n_rows, n_cols = 256, 256
+n_rows, n_cols = 100, 100
 
 # Créez la grille et initialisez les températures initiales
 grid = np.zeros((n_rows, n_cols))
-boolean_grid = np.full((n_rows, n_cols), True, dtype=bool)
+materialGrid = np.zeros((n_rows, n_cols), dtype=int)
+staticGrid = np.full((n_rows, n_cols), True, dtype=bool)    # grid that stores the static cells (the ones that you do not want to be modified)
 
 
+### Manual selection ###
 
-#zones infinies
-### gauche droite ###
+### gauche droite 1 colone###
 grid[:, :1] = 100     # Zone chaude
-boolean_grid[:, :1] = False
-grid[:, -1] = -100    # Zone froide
-boolean_grid[:, -1] = False
+staticGrid[:, :1] = False
+grid[:, -1] = -50    # Zone froide
+staticGrid[:, -1] = False
+materialGrid[:, n_cols//2] = 1
+
+### gauche droite ###
+# grid[:, :n_cols // 2] = 100
+# grid[:, n_cols // 2:] = -100
 
 ### centre ###
 # grid[15:17, 15:17] = 100
-# boolean_grid[15:17, 15:17] = False
+# staticGrid[15:17, 15:17] = False
 
-### coins ###
+## coins ###
 # grid[0,0] = 100
-# boolean_grid[0,0] = False
+# staticGrid[0,0] = False
 # grid[-1,-1] = -100
-# boolean_grid[-1,-1] = False
+# staticGrid[-1,-1] = False
+### --------------- ###
 
-np.set_printoptions(precision=2, suppress=True)
-print(grid)
 
-# Matrice de propagation pour un matériau
-propagation_matrix = np.array([[1/36, 4/36, 1/36],  # faible propagation
-                               [4/36, 16/36, 4/36],
-                               [1/36, 4/36, 1/36]])
-propagation_matrix = np.array([[1/9, 1/9, 1/9],     # forte propagation
-                               [1/9, 1/9, 1/9],
-                               [1/9, 1/9, 1/9]])
-propagation_size = propagation_matrix.shape[0]
+### Declaration of the different types of matrices ###
+matrices = []   # contains the matrices for all materials
+matrices.append(np.array([[1/9, 1/9, 1/9],   # propagation matrix in the air
+                         [1/9, 1/9, 1/9],
+                         [1/9, 1/9, 1/9]]))
+matrices.append(np.array([[1/42, 2/42, 1/42],   # propagation matrix in concrete
+                         [2/42, 30/42, 2/42],
+                         [1/42, 2/42, 1/42]]))
+matrices.append(np.array([[1/36, 4/36, 1/36],   # propagation matrix in wood
+                         [4/36, 16/36, 4/36],
+                         [1/36, 4/36, 1/36]]))
+
+propagation_size = matrices[0].shape[0]
+
+# Nombre d'itérations de simulation
+iterations = 10000      # max iterations
 
 
 # Fonction de simulation de diffusion de chaleur
-def simulate_heat_diffusion(grid, propagation_matrix, iterations):
+def simulate_heat_diffusion(grid, matrices, iterations):
     for iteration in range(iterations):
         new_grid = np.copy(grid)
         for i in range(n_rows):
             for j in range(n_cols):
-                if (boolean_grid[i,j]): # if is allowed to be replaced
+                if (staticGrid[i,j]): # if is allowed to be replaced
                     neighborhood = grid[max(0, i - 1):min(n_rows, i + 2), max(0, j - 1):min(n_cols, j + 2)] # neighborhood de taille variable : min (2,2) et max (3,3)
+                    propagation_matrix = matrices[materialGrid[i,j]]
                     if (neighborhood.shape == (3, 3)):  # si non près d'un bord
                         new_grid[i, j] = np.sum(neighborhood * propagation_matrix)
                     else:
@@ -79,14 +96,14 @@ def simulate_heat_diffusion(grid, propagation_matrix, iterations):
         grid = np.copy(new_grid)  # Mettez à jour la grille d'origine avec les nouvelles valeurs
         yield grid, iteration   # renvoie une version mise à jour de la grille à chaque étape du for
 
-# Nombre d'itérations de simulation
-iterations = 10000
 
 cmap = plt.get_cmap('coolwarm')
+min_temperature = -100  # Température minimale
+max_temperature = 100  # Température maximale
 
 # Affichez la grille avec une carte de couleur à chaque itération
-for grid, iteration in simulate_heat_diffusion(grid, propagation_matrix, iterations):
-    plt.imshow(grid[0:n_rows, 0:n_cols - 0], cmap=cmap, interpolation='nearest')
+for grid, iteration in simulate_heat_diffusion(grid, matrices, iterations):
+    plt.imshow(grid[0:n_rows, 0:n_cols - 0], cmap=cmap, interpolation='nearest', vmin=min_temperature, vmax=max_temperature)
     plt.colorbar()
     plt.text(0.05, 0.05, f'Iteration: {iteration}', transform=plt.gca().transAxes, color='white')
     if(printNumbers):
@@ -98,7 +115,7 @@ for grid, iteration in simulate_heat_diffusion(grid, propagation_matrix, iterati
     plt.clf()  # Effacez le graphique précédent pour la mise à jour
 
 # Affichage de la fenêtre
-plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation='nearest')
+plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation='nearest', vmin=min_temperature, vmax=max_temperature)
 plt.colorbar()
 plt.text(0.05, 0.05, f'Iteration: {iterations}', transform=plt.gca().transAxes, color='white')
 if (printNumbers):
