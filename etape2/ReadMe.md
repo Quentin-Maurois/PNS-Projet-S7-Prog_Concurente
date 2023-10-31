@@ -24,7 +24,11 @@ Nous sommes en train d'explorer 2 approches afin de prendre en compte les differ
 
 Afin de le lancer :
 
-> `python .\heatDiffusion_PercentagePath.py`
+> `python .\heatDiffusion.py`
+
+ainsi que :
+
+> `python .\heatDiffusion_kinda_works.py`
 
 Nous n'avons pas encore creer d'argument ou d'options afin de personnaliser ce modele
 
