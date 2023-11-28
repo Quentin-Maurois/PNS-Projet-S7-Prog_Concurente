@@ -1,0 +1,21 @@
+FROM nogil/python
+
+RUN apt-get update && \
+    apt-get install -y \
+    libgl1-mesa-glx \
+    libx11-xcb1 \
+    libxcb-dri3-0 \
+    libxtst6 \
+    libxss1 \
+    libasound2 \
+    xwayland
+
+WORKDIR /usr/src/app
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD [ "python", "./heatDiffusion.py" ]
+
