@@ -1,5 +1,3 @@
-import threading
-
 import numpy as np
 import matplotlib.pyplot as plt
 import materialSelectionFunction
@@ -57,15 +55,9 @@ def updateGrid(i, j, inputGrid, outputGrid, matrices, staticGrid, materialGrid, 
 def simulate_heat_diffusion(grid, matrices, iterations, n_rows, n_cols, staticGrid, materialGrid, propagation_size):
     for iteration in range(iterations):
         new_grid = np.copy(grid)
-        threads = []
         for i in range(n_rows):
             for j in range(n_cols):
-                t = threading.Thread(target=updateGrid, args=(i, j, grid, new_grid, matrices, staticGrid, materialGrid, n_rows, n_cols, propagation_size))
-                threads.append(t)
-                t.start()
-
-        for t in threads:
-            t.join()
+                updateGrid(i, j, grid, new_grid, matrices, staticGrid, materialGrid, n_rows, n_cols, propagation_size)
 
 
         grid = np.copy(new_grid)  # Mettez à jour la grille d'origine avec les nouvelles valeurs
@@ -82,7 +74,7 @@ def HDPlot(n_rows, n_cols, iterations, keepAtTheEnd):
     ### Manual selection ###
 
     ### gauche droite 1 colone###
-    grid[:, :1] = 100  # Zone chaude
+    grid[:, :1] = -20  # Zone chaude
     staticGrid[:, :1] = False
     # grid[:, -1] = -50  # Zone froide
     # staticGrid[:, -1] = False
