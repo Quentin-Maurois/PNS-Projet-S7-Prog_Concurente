@@ -57,3 +57,31 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 # Analyse des résultats
 
+Resultat de la seconde etape:
+
+- speedup
+    demo 0 5x5
+    0.550355659
+    demo 1 10x10
+    0.584950755
+    demo 2 25x25
+    0.746952686
+    demo 3 50x50
+    1.082769542
+    demo 4 100x100
+    2.086069271
+
+
+- Efficacité
+    demo 0 5x5
+    0.550355659 / 25 = 0.022014226
+    demo 1 10x10
+    0.584950755 / 100 = 0.005849508
+    demo 2 25x25
+    0.746952686 / 625 = 0.001195124
+    demo 3 50x50
+    1.082769542 / 2500 = 0.000433108
+    demo 4 100x100
+    2.086069271 / 10000 = 0.000208607
+
+Nous pouvons remarque que les resultats que nous avons obtenu ne sont pas convainquant etant donnée que l'effcacité est extremement basse. Nous pensons que nous aurions pu obtenir des resumltats pite ou equivalent sur des toutes petites grille dues au temps de creation des threads. Cependant l'utilisation de thread aurait du, sur de grande grille, nous faire gagner du temps et pas en perdre encore plus.
