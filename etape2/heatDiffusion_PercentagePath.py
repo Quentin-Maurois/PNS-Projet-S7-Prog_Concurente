@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import argparse
+import time
 
 # Création d'un analyseur d'arguments
 parser = argparse.ArgumentParser(description='diffusion de la chaleur ponderer avec des pourcentages.')
@@ -16,7 +17,7 @@ args = parser.parse_args()
 printNumbers = -1
 
 # Nombre d'itérations de simulation
-iterations = 1000
+iterations = 100
 
 # Taille de la grille
 n_rows, n_cols = 50, 50
@@ -40,42 +41,92 @@ if args.caseValue is not None:
     else :
         print("valeur non valide")
 
+
 if args.demo is not None:
     print("demo :", args.demo)
     if args.demo == 0:
         # Taille de la grille
-        n_rows, n_cols = 16, 16
-        
+        n_rows, n_cols = 5, 5
+
         # Créez la grille et initialisez les températures initiales
         grid = np.zeros((n_rows, n_cols))
-        
-        #zones infinies
+
+        # zones infinies
         material_grid = np.ones(grid.shape)
-        
+
         # ici la moitie superieur est beaucoup moins sensible a la propagation de chaleur
-        grid[:, :] = 100     # Zone chaude
-        grid[1:-1, 1:-1] = 0     # Zone neutre
-        grid[7:8, 7:8] = -100     # Zone froide
-        material_grid[:,:] = 0     # Zone chaude static
-        material_grid[:-1, 1:-1] = 1     # Zone froide static
-    if args.demo == 1:
+        grid[0, :] = 100  # Zone chaude
+        grid[-1, :] = -50  # Zone froide
+        material_grid[:, :1] = 1  # colonne chaude facile
+        material_grid[:, -2:] = 1  # colonne froide facile
+        material_grid[0, :] = 0  # Zone chaude static
+        material_grid[-1, :] = 0  # Zone froide static
+        material_grid[1:-1, 2:-2] = 1  # No temperatures land
+    elif args.demo == 1:
         # Taille de la grille
-        n_rows, n_cols = 6, 6
-        
+        n_rows, n_cols = 10, 10
+
         # Créez la grille et initialisez les températures initiales
         grid = np.zeros((n_rows, n_cols))
-        
-        #zones infinies
+
+        # zones infinies
         material_grid = np.ones(grid.shape)
-        
+
         # ici la moitie superieur est beaucoup moins sensible a la propagation de chaleur
-        grid[0, :] = 100     # Zone chaude
-        grid[-1, :] = -100     # Zone froide
-        material_grid[:, :1] = 1     # colonne chaude facile
-        material_grid[:, -2:] = 1     # colonne froide facile
-        material_grid[0, :] = 0     # Zone chaude static
-        material_grid[-1, :] = 0     # Zone froide static
-        material_grid[1:-1, 2:-2] = 0.01     # No temperatures land
+        grid[:, :] = 100  # Zone chaude
+        grid[1:-1, 1:-1] = 0  # Zone neutre
+        grid[7:8, 7:8] = -100  # Zone froide
+        material_grid[:, :] = 0  # Zone chaude static
+        material_grid[:-1, 1:-1] = 1  # Zone froide static
+    elif args.demo == 2:
+        # Taille de la grille
+        n_rows, n_cols = 25, 25
+
+        # Créez la grille et initialisez les températures initiales
+        grid = np.zeros((n_rows, n_cols))
+        material_grid = np.ones(grid.shape)
+
+        grid[12, :12] = 100  # Zone chaude
+
+    elif args.demo == 3:
+        # Taille de la grille
+        n_rows, n_cols = 50, 50
+
+        # Créez la grille et initialisez les températures initiales
+        grid = np.zeros((n_rows, n_cols))
+        material_grid = np.ones(grid.shape)
+
+        grid[:, 24:26] = 100  # Zone chaude
+        material_grid[:, 24:26] = 0
+
+        grid[:25, -2:] = -100  # Zone chaude
+        material_grid[:25, -2:] = 0
+
+        grid[25:, :1] = -50
+        material_grid[25:, :1] = 0
+
+    elif args.demo == 4:
+        # Taille de la grille
+        n_rows, n_cols = 100, 100
+
+        # Créez la grille et initialisez les températures initiales
+        grid = np.zeros((n_rows, n_cols))
+        material_grid = np.ones(grid.shape)
+
+        grid[0, :75] = -100  # Zone chaude
+        material_grid[0, :75] = 0
+
+        grid[25, 25:] = 100  # Zone chaude
+        material_grid[25, 25:] = 0.5
+
+        grid[49:51, 50:] = 50  # Zone chaude
+        grid[49:51, :50] = -50  # Zone froide
+
+        grid[75, :75] = -100  # Zone chaude
+        material_grid[75, :75] = 0.5
+
+        grid[-1, 25:] = 100  # Zone chaude
+        material_grid[-1, 25:] = 0
 
 if args.iterations is not None and not np.nan(args.iterations):
         iterations = args.iterations
@@ -156,7 +207,7 @@ def simulate_heat_diffusion(propagation_matrix, iterations):
 
 
 cmap = plt.get_cmap('coolwarm')
-
+STARTTIME= time.time()
 # Affichez la grille avec une carte de couleur à chaque itération
 for grid, iteration in simulate_heat_diffusion(propagation_matrix, iterations):
     plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation='nearest')
@@ -174,6 +225,5 @@ for grid, iteration in simulate_heat_diffusion(propagation_matrix, iterations):
     plt.clf()  # Effacez le graphique précédent pour la mise à jour
 
 # Affichage de la fenêtre
-                
-plt.pause(-1)
+print(time.time() - STARTTIME)        
 plt.plot()
