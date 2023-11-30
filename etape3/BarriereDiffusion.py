@@ -36,6 +36,9 @@ printNumbers = -1
 maxIterations = 100
 maxloop = 1  # nombre maximum changement de valeur dans chaque cellule par iteration
 
+# Garder l'affichage à la fin
+keepAtTheEnd = False
+
 # Interruption des threads
 Simulate = True
 
@@ -291,10 +294,12 @@ for stage in range(2):
                     threads_grid[x][y].start()
 
 cmap = plt.get_cmap("coolwarm")
+min_temperature = np.min(grid)  # Température minimale
+max_temperature = np.max(grid)  # Température maximale
 try:
     # Affichez la grille avec une carte de couleur à chaque itération
     for grid, iteration in simulate_heat_diffusion(maxIterations, startBarrier):
-        plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation="nearest")
+        plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation="nearest", vmin=min_temperature, vmax=max_temperature)
         plt.colorbar()
         plt.text(
             0.05,
@@ -344,7 +349,7 @@ finally:
                 continue
             if material_grid[x, y] != 0:  # if is allowed to be replaced
                 threads_grid[x][y].join()  # Attendre que chaque thread se termine
-
-    plt.plot()
-    input("Apuyer sur une touche pour fermer le programme.")
+    if keepAtTheEnd:
+        plt.plot()
+        input("Apuyer sur une touche pour fermer le programme.")
     sys.exit(0)  # Terminer proprement le programme après l'interruption
