@@ -9,12 +9,6 @@ Marco Laclavere
 Le projet a pour but de simuler une propagation de chaleur entre différentes cases et à travers différents matériaux.
 Il est séparé en trois parties : une partie séquencielle, une partie avec parallélisme à grain fin et une dernière partie avec parallélisme correspondant aux coeurs disponnibles sur la machine.
 
-## Avancement du projet
-
-
-
-
-
 # Utilisation
 
 Tout d'abord, bien qu'il soit possible de lancer les programmes sur tout système d'exploitation, il est nécessaire pour lancer les programmes avec docker (les programmes qui ne sont pas restreints par le GIL) il est nécessaire de posséder un serveur graphique X. 
@@ -22,7 +16,17 @@ Tout d'abord, bien qu'il soit possible de lancer les programmes sur tout systèm
 
 ## Avec GIL, environnement python "classique"
 
-\>>>TODO<<<
+pour lancer cette partie du projet, il faut ecrire:
+> `./BarriereDiffusion.py`
+
+
+vous pouvez consulté les arguments disponibles avec:
+> `./BarriereDiffusion.py --help`
+Les arguments disponibles sont:
+  > - `--caseValue` : permet de determiner quels valeurs afficher dans les cases de la simulation : soit la temperature (`--caseValue 0`) soit le *pourcentage de sensibilite a son environement\** (`-- caseValue 1`)
+
+  > - `--demo` : permet de determiner quel demo sera utiliser pour la simulation : il en existe 4 (`--demo` avec comme valeur`0`,`1`,`2`,`3` ou `4`)
+  > - `--iteration` : permet de definir le nombre d'iteration qui sont a realiser *(par defaut 100)*
 
 ## Docker, les programmes sans GIL
 #### Sur une machine sans serveur graphique X
@@ -52,3 +56,4 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 
 # Analyse des résultats
+
