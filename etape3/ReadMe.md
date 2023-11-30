@@ -1,63 +1,54 @@
-# Etape 2 - Diffusion de chaleur
-
 Quentin Maurois
 
 Marco Laclavere
 
+
+
+## Description du projet
+
+Le projet a pour but de simuler une propagation de chaleur entre différentes cases et à travers différents matériaux.
+Il est séparé en trois parties : une partie séquencielle, une partie avec parallélisme à grain fin et une dernière partie avec parallélisme correspondant aux coeurs disponnibles sur la machine.
+
 ## Avancement du projet
 
-Nous avons implementer un affichage afin de pouvoir observer l'evolution des temperatures sur une grille.
 
-Nous sommes en train d'explorer 2 approches afin de prendre en compte les different materiaux qui devront etre representé:
 
-- En utilisant des matrices: cette approche conciste a ne plus utiliser qu'une seule matrice mais une pour chaque type de materiaux que nous representons. Cela a pour avantage de facilement calibrer pour chaque materiaux la diffusion de chaleur qui l'influera ainsi que a quel point.
-- En utilisant des pourcentages: Ici nous n'utilisons qu'une seule matrice pour diffuser la chaleur mais celle ci sera ponderer par un pourcentage. Lors de la diffusion de la chaleur nous allons calculer la difference de temperature entre avant et apres la diffusion de chaleur et multiplier cette difference par un pourcentage afin de savoir enquel proportion nous devons prendre en compte la nouvelle valeur
 
-  > valeur_apres_diffusion = (valeur_calculer_avec_la_matrice - valeur_avant_diffusion) \* pourcentage
 
-  Cela a comme avantage que nous pouvons facilement representer un grand nombre de materiaux
-  Cependant cela se fait au detriment de la qualité de notre modele etant donnée que nous simplifions fortement une grande quantité de parametre (densité du materiaux, sa composition, etc).
+# Utilisation
 
-## Utilisation
+Tout d'abord, bien qu'il soit possible de lancer les programmes sur tout système d'exploitation, il est nécessaire pour lancer les programmes avec docker (les programmes qui ne sont pas restreints par le GIL) il est nécessaire de posséder un serveur graphique X. 
 
-### Modele à multiples matrices
 
-Afin de le lancer :
+## Avec GIL, environnement python "classique"
 
-> `python .\heatDiffusion.py`
+\>>>TODO<<<
 
-ainsi que :
+## Docker, les programmes sans GIL
+#### Sur une machine sans serveur graphique X
+Pour une machine qui n'utilise pas de base un serveur X, la solution la plus simple pour éviter tout problème de compatibilité est d'utiliser une machine virtuelle. Cela a été testé sur une machine ubuntu 22.04 () avec une installation minimale.
 
-> `python .\heatDiffusion_kinda_works.py`
+Il est nécessaire d'installer docker
+> 'sudo apt install docker'
 
-Nous n'avons pas encore creer d'argument ou d'options afin de personnaliser ce modele
+Vous pouvez maintenant suivre les instructions pour une machine avec un serveur X
 
-### Modele à pourcentage
 
-Afin de le lancer :
+#### Sur une machine avec serveur graphique X
+Assurez vous d'avoir docker installé sur votre machine (tout dépends de votre OS et/ou package manager)
 
-> `python .\heatDiffusion_PercentagePath.py`
+Le dossier contient des scripts shell. Autorisez l'execution de ces fichiers :
 
-Pour ce modele nous avons creer 3 arguments possible:
+> 'chmod +x '*.sh'
 
-- `caseValue <int>` : permet de definir quelle valeur nous voulons afficher dans chaque cases de notre figure (sur les grands tableaux cela devient illisible)
-  - 0 permet d'afficher les temperatures
-  - 1 permet d'afficher le pourcentage d'absorption de la chaleur de la case
-- `iterations <int>` : permet de fefinir le nombre maximale d'iteration a faire
-- `demo <int>` : permet d'afficher differente d'autres figures que celle sans arguments:
+Le fichier dockerBuild.sh crée les images docker. La construction de l'une des images a été commentée car le programme semble avoir une fuite de mémoire problématique. Les images sont sous le nom "heat_diffusion" avec le tag :3 pour l'image qui présente le problème de mémoire et le tag :3.1 pour l'image qui fonctionne.
 
-  - sans cette option : une ligne au centre de 100°C fixe
+> './dockerBuild.sh'
 
-    la partie inferieur du tableau est tres sensible au changement de temperature.
+Il y a deux images donc deux scripts permettant de les lancer. Le script  runNoGIL_old.sh lance l'image gourmande en RAM et il n'est pas recommandé de l'utiliser actuellement et le script runNoGIL.sh lance la bonne image.
+Ces scripts ouvrent une connexion locale qui permet au container d'accéder au serveur X de la machine et donc d'avoir une sortie graphique. ATTENTION cela peut poser des problèmes de sécurité car d'autres utilisateurs de la machine en local ont également accès a cette connexion. Les scripts ouvrent cette connexion avant de lancer le container et la ferme à la fin de l'execution du container.
 
-    la partie superieur est peu sensible au changement de temperatures
+> 'runNoGIL.sh'
 
-  - 0 : les bords gauche bas et droit de la figure ne peuvent pas changer de temperature (100°C)
-    le centre de la figure a une temperature initiale de -100°C
-  - 1 : le bord haut et bas de la figure ne peuvent pas changer de temperature ils sont respectivement a -100 et 100°C
-    la zone au centre de la figure change difficilement de temperature (1%) alors que les autres cases changent normalement (100%)
 
-## Perspective
-
-Nous sommes en train de développer un outil qui permettra de "peindre" des types de materiaux sur une toile qui sera ensuite utilise par notre programme de diffusion de la chaleur afin de faciliter la creation de simulation.
-Nous comptons aussi changer l'affichage de nos figures afin de mettre en evidence a la fois la temperature de l'element mais aussi sa composition. Car pour le moment nous ne pouvons que afficher les temperatures.
+# Analyse des résultats
