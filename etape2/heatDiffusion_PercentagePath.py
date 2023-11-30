@@ -19,7 +19,7 @@ printNumbers = -1
 iterations = 1000
 
 # Taille de la grille
-n_rows, n_cols = 9, 5
+n_rows, n_cols = 50, 50
 
 # Créez la grille et initialisez les températures initiales
 grid = np.zeros((n_rows, n_cols))
@@ -28,8 +28,8 @@ grid = np.zeros((n_rows, n_cols))
 material_grid = np.ones(grid.shape)
 
 # ici la moitie superieur est beaucoup moins sensible a la propagation de chaleur
-grid[4, :] = 100     # Zone chaude
-material_grid[4, :] = 0     # Zone chaude
+grid[4, :50] = 100     # Zone chaude
+material_grid[4, :50] = 0     # Zone chaude
 material_grid[:4,:] = 0.1 # la partie superieur de la map est moins affecte par la diffusion de chaleur
 
 # Utilisation des arguments
