@@ -7,4 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-CMD ["python", "./BarriereDiffusion.py"]
+
+RUN chmod +x runAllDemos.sh
+
+CMD ["./runAllDemos.sh"]
