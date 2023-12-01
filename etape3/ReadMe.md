@@ -16,17 +16,23 @@ Tout d'abord, bien qu'il soit possible de lancer les programmes sur tout systèm
 
 ## Avec GIL, environnement python "classique"
 
-pour lancer cette partie du projet, il faut ecrire:
+pour lancer cette partie du projet, il faut entrer:
 > `./BarriereDiffusion.py`
 
 
 vous pouvez consulté les arguments disponibles avec:
 > `./BarriereDiffusion.py --help`
-Les arguments disponibles sont:
-  > - `--caseValue` : permet de determiner quels valeurs afficher dans les cases de la simulation : soit la temperature (`--caseValue 0`) soit le *pourcentage de sensibilite a son environement\** (`-- caseValue 1`)
 
-  > - `--demo` : permet de determiner quel demo sera utiliser pour la simulation : il en existe 4 (`--demo` avec comme valeur`0`,`1`,`2`,`3` ou `4`)
-  > - `--iteration` : permet de definir le nombre d'iteration qui sont a realiser *(par defaut 100)*
+Les arguments disponibles sont:
+  - `--caseValue` : permet de determiner quels valeurs afficher dans les cases de la simulation : soit la temperature (`--caseValue 0`) soit le *pourcentage de sensibilite a son environement\** (`-- caseValue 1`)
+
+  - `--demo` : permet de determiner quel demo sera utiliser pour la simulation : il en existe 4 de la plus petite grille jusqu'a la plus grande: (`--demo` avec comme valeur `0`, `1`, `2`, `3` ou `4`)
+    > - demo0 : 5x5
+    > - demo1 : 10x10
+    > - demo2 : 25x25
+    > - demo3 : 50x50
+    > - demo4 : 100x100
+  - `--iteration` : permet de definir le nombre d'iteration qui sont a realiser *(par defaut 100)*
 
 ## Docker, les programmes sans GIL
 #### Sur une machine sans serveur graphique X
@@ -56,32 +62,66 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 
 # Analyse des résultats
+### Resultat de la premiere etape (temps d'execution):
 
-Resultat de la seconde etape:
+- demo 0
+  > 7.258728504180908 sec
+- demo 1
+  > 7.686929941177368 sec
+- demo 2
+  > 10.299062252044678 sec
+- demo 3
+  > 20.986248016357422 sec
+- demo 4
+  > 97.18011999130249 sec
 
-- speedup
-    demo 0 5x5
-    0.550355659
-    demo 1 10x10
-    0.584950755
-    demo 2 25x25
-    0.746952686
-    demo 3 50x50
-    1.082769542
-    demo 4 100x100
-    2.086069271
+### Resultat de la seconde etape (temps d'execution):
+
+- demo 0
+  > 13.189159393310547 sec
+- demo 1
+  > 13.141157388687134 sec
+- demo 2
+  > 13.788105249404907 sec
+- demo 3
+  > 19.38200807571411 sec
+- demo 4
+  > 46.58527946472168 sec
 
 
-- Efficacité
-    demo 0 5x5
-    0.550355659 / 25 = 0.022014226
-    demo 1 10x10
-    0.584950755 / 100 = 0.005849508
-    demo 2 25x25
-    0.746952686 / 625 = 0.001195124
-    demo 3 50x50
-    1.082769542 / 2500 = 0.000433108
-    demo 4 100x100
-    2.086069271 / 10000 = 0.000208607
+Nous pouvons remarque que sur de petites grille tout faire sequentiellement est plus rapide que de creer un thread par cases de notre tableaux. Cela s'explique par le fait que créer un thread est plus cher que ce qu'il permet de gagner en temps.
 
-Nous pouvons remarque que les resultats que nous avons obtenu ne sont pas convainquant etant donnée que l'effcacité est extremement basse. Nous pensons que nous aurions pu obtenir des resumltats pite ou equivalent sur des toutes petites grille dues au temps de creation des threads. Cependant l'utilisation de thread aurait du, sur de grande grille, nous faire gagner du temps et pas en perdre encore plus.
+Neanmoins nous pouvons voir que sur de plus grande grille, avoir multiplié le nombre de thread permet de gagner du temps malgrés leurs coup initial de creation.
+
+
+
+
+### speedup
+- demo 0
+  > 0.550355659
+- demo 1
+  > 0.584950755
+- demo 2
+  > 0.746952686
+- demo 3
+  > 1.082769542
+- demo 4
+  > 2.086069271
+
+
+### Efficacité
+- demo 0
+  > 0.550355659 / 25 = 0.022014226
+- demo 1
+  > 0.584950755 / 100 = 0.005849508
+- demo 2
+  > 0.746952686 / 625 = 0.001195124
+- demo 3
+  > 1.082769542 / 2500 = 0.000433108
+- demo 4
+  > 2.086069271 / 10000 = 0.000208607
+
+Nous pouvons remarque que les resultats que nous avons obtenu sont tres bas et ne cesse de diminuer en augmentant la taille de la grille
+
+Un si grand nombre de thread n'est pas efficace car il n'y a pas assez de coeur qui permettent de paralleliser le traitement
+Cela explique pourquoi on observe une baisse d'efficacite de chacun de nos thread.
