@@ -200,57 +200,70 @@ def update_value(i, j, value):
     new_grid[i, j] = current + ((value - current) * percent)
 
 
-def heat_simulation_on(coords:(int,int)):
-    i = coords[0]
-    j = coords[1]
-    loop = 0
-    s_row, e_row, s_col, e_col = generate_neighboor_indice(i, j)
-
-    while Simulate:
-        neighborhood = grid[s_row:e_row, s_col:e_col]
-        if (maxloop == loop):
-            return
-        loop += 1
-        if neighborhood.shape == (
-            propagation_size[0],
-            propagation_size[1],
-        ):  # si non près d'un bord
-            update_value(i, j, np.sum(neighborhood * propagation_matrix))
-        else:
-            # thisPropagationMatrix match la forme de neighborhood avec le centre de cette matrice à l'emplacement des coordonnées i,j dans la matrice neighborhood
-
-            start_row = max(0, i - (propagation_size[0] // 2))
-            start_col = max(0, j - (propagation_size[1] // 2))
-
-            thisPropagationMatrix = np.zeros(neighborhood.shape)
-
-            # attribution des coefficients à la matrice :
-            for k in range(neighborhood.shape[0]):
-                for l in range(neighborhood.shape[1]):
-                    thisPropagationMatrix[
-                        i - start_row - 1 + k, j - start_col - 1 + l
-                    ] = 1 / (
-                        thisPropagationMatrix.shape[0]
-                        * thisPropagationMatrix.shape[1]
-                    )  # INFO : pour une matrice de 1 / nb d'éléments
-                    #         thisPropagationMatrix[i - start_row - 1 + k, j - start_col - 1 + l] = propagation_matrix[center_i - 1 + k, center_j - 1 + l]
-
-            new_value = np.sum(neighborhood * thisPropagationMatrix)
-            update_value(i, j, new_value)
+def heat_simulation_on(coords:[(int,int)]):
+    print("have ",len(coords))
+    for indice in range(len(coords)):
+        i = coords[indice][0]
+        j = coords[indice][1]
+        s_row, e_row, s_col, e_col = generate_neighboor_indice(i, j)
+        if(material_grid[i][j]==0):
+            continue;
+        for loopNum in range(maxloop):
+            neighborhood = grid[s_row:e_row, s_col:e_col]
+            if neighborhood.shape == (
+                propagation_size[0],
+                propagation_size[1],
+            ):  # si non près d'un bord
+                update_value(i, j, np.sum(neighborhood * propagation_matrix))
+            else:
+                # thisPropagationMatrix match la forme de neighborhood avec le centre de cette matrice à l'emplacement des coordonnées i,j dans la matrice neighborhood
+    
+                start_row = max(0, i - (propagation_size[0] // 2))
+                start_col = max(0, j - (propagation_size[1] // 2))
+    
+                thisPropagationMatrix = np.zeros(neighborhood.shape)
+    
+                # attribution des coefficients à la matrice :
+                for k in range(neighborhood.shape[0]):
+                    for l in range(neighborhood.shape[1]):
+                        thisPropagationMatrix[
+                            i - start_row - 1 + k, j - start_col - 1 + l
+                        ] = 1 / (
+                            thisPropagationMatrix.shape[0]
+                            * thisPropagationMatrix.shape[1]
+                        )  # INFO : pour une matrice de 1 / nb d'éléments
+                        #         thisPropagationMatrix[i - start_row - 1 + k, j - start_col - 1 + l] = propagation_matrix[center_i - 1 + k, center_j - 1 + l]
+    
+                new_value = np.sum(neighborhood * thisPropagationMatrix)
+                update_value(i, j, new_value)
 
 
 # Fonction de simulation de diffusion de chaleur
-def simulate_heat_diffusion(maxIteration: int, coordsToChange : [(int,int)], pool):
+def simulate_heat_diffusion(maxIteration: int, coordsToChange : [[(int,int)]], pool):
     for i in range(maxIteration):
-        tab = coordsToChange.copy()
-        random.shuffle(tab)
-        pool.map(heat_simulation_on, tab)
+        pool.map(heat_simulation_on, coordsToChange)
         grid = np.copy(
             new_grid
         )  # Mettez à jour la grille d'origine avec les nouvelles valeurs
         yield grid, i + 1  # renvoie une version mise à jour de la grille à chaque étape du for
 
     return
+
+def divide_array(array, num_sections):
+    total_elements = len(array)
+    section_size = total_elements // num_sections
+    remainder = total_elements % num_sections
+
+    sections = []
+    start_index = 0
+
+    for i in range(num_sections):
+        end_index = start_index + section_size + (1 if i < remainder else 0)
+        section = array[start_index:end_index]
+        sections.append(section)
+        start_index = end_index
+
+    return sections
 
 # SET UP
 nbThreads = os.cpu_count()
@@ -262,7 +275,9 @@ for x in range(n_rows):
         if material_grid[x, y] != 0:
             AllCoordsToChange.append((x,y))
 
+random.shuffle(AllCoordsToChange)
 pool = CFu.ThreadPoolExecutor(nbThreads)
+CoordsChunk = divide_array(AllCoordsToChange,nbThreads)
 
 # LAUNCH
 print("Start")
@@ -271,13 +286,12 @@ print("nombre de cases a mettre a jour/iteration: ",len(AllCoordsToChange))
 print("nombre de simulation: ",maxIterations)
 print("pool de thread de taille: ",nbThreads)
 TIMESTART = time.time()
-
 cmap = plt.get_cmap("coolwarm")
 min_temperature = np.min(grid)  # Température minimale
 max_temperature = np.max(grid)  # Température maximale
 try:
     # Affichez la grille avec une carte de couleur à chaque itération
-    for grid, iteration in simulate_heat_diffusion(maxIterations,AllCoordsToChange,pool):
+    for grid, iteration in simulate_heat_diffusion(maxIterations,CoordsChunk,pool):
         plt.imshow(grid[0:n_rows, 0:n_cols], cmap=cmap, interpolation="nearest", vmin=min_temperature, vmax=max_temperature)
         plt.colorbar()
         plt.text(
