@@ -64,79 +64,54 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 # Analyse des résultats
 
-### Resultat de la premiere etape (temps d'execution):
+Lors de cette etape nous avons remplacer la creation d'un thread par case par un pool de x threads (x etant le nombre de coeur de la machine). Auquels nous donneront des taches a réaliser.
 
-- demo 0
-  > 7.258728504180908 sec
-- demo 1
-  > 7.686929941177368 sec
-- demo 2
-  > 10.299062252044678 sec
-- demo 3
-  > 20.986248016357422 sec
-- demo 4
-  > 97.18011999130249 sec
-
-### Resultat de la seconde etape (temps d'execution):
-
-- demo 0
-  > 13.189159393310547 sec
-- demo 1
-  > 13.141157388687134 sec
-- demo 2
-  > 13.788105249404907 sec
-- demo 3
-  > 19.38200807571411 sec
-- demo 4
-  > 46.58527946472168 sec
-
-Nous pouvons remarque que sur de petites grille tout faire sequentiellement est plus rapide que de creer un thread par cases de notre tableaux. Cela s'explique par le fait que créer un thread est plus cher que ce qu'il permet de gagner en temps.
-
-Neanmoins nous pouvons voir que sur de plus grande grille, avoir multiplié le nombre de thread permet de gagner du temps malgrés leurs coup initial de creation.
+Lors de la réalisation de cette etape nous avons eu de meilleurs resultats que lors de l'etape precedente. Cela s'explique par le fait que on a limité le nombre de thread crée au nombre de coeur de notre machine. Ainsi en creant moins de threads nous gagnons du temps. Cependant par rapport a la premiere version sequentiel du projet nos resultats sont toujours moins bons. Nous pensons que cela est a cause non seulement du coup de creation des threads mais aussi que donner une tache a un thread est plus couteux que ce qu'elle nous fais gagner en temps.
 
 ### speedup
 
 - demo 0
-  > 0.550355659
+  > 0,5124871033
 - demo 1
-  > 0.584950755
+  > 0,4981214652
 - demo 2
-  > 0.746952686
+  > 0,5230048069
 - demo 3
-  > 1.082769542
+  > 0,513056722
 - demo 4
-  > 2.086069271
+  > 0,4236033876
 
 ### Efficacité
 
 - demo 0
-  > 0.550355659 / 25 = 0.022014226
+  > 6,41%
 - demo 1
-  > 0.584950755 / 100 = 0.005849508
+  > 6,23%
 - demo 2
-  > 0.746952686 / 625 = 0.001195124
+  > 6,54%
 - demo 3
-  > 1.082769542 / 2500 = 0.000433108
+  > 6,41%
 - demo 4
-  > 2.086069271 / 10000 = 0.000208607
+  > 5,30%
 
-Nous pouvons remarque que les resultats que nous avons obtenu sont tres bas et ne cesse de diminuer en augmentant la taille de la grille
+Nous pouvons clairement voir ici que le parallelisme a entrainé une baisse des performances. Notre efficacite a augmenté comparé au precedents resultats. Neanmoins ils montrent bien que le parralelisme ne nous fais perdre en performance dans notre cas.
 
-Un si grand nombre de thread n'est pas efficace car il n'y a pas assez de coeur qui permettent de paralleliser le traitement
-Cela explique pourquoi on observe une baisse d'efficacite de chacun de nos thread.
+## Pseudo code des differentes etapes
+
+### Etape 2
 
 ```
---- === Etape 2 === ---
 Main
 -  pour chaque iteration
--  pour chaque case de notre tableau:
--  -  mettre a jour la case
--    afficher le tableau
+-  -  pour chaque case de notre tableau:
+-  -  -  mettre a jour la case
+-  -  afficher le tableau
 -  Fin
 ```
 
+### Etape 3
+
 ```
---- === Etape 3 === ---
 Main
 -  pour chaque case de notre tableau:
 -  -  creer un thread associé a cette case
@@ -157,8 +132,9 @@ PseudoCodeThread
 -  Fin
 ```
 
+### Etape 4
+
 ```
---- === Etape 4 === ---
 Main
 -  creer une liste
 -  pour chaque case du tableau :
