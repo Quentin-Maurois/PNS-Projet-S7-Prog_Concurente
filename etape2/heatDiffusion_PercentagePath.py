@@ -199,7 +199,7 @@ def simulate_heat_diffusion(propagation_matrix, iterations):
                             continue
                         # index += 1
                         # indexgrid[x,y]=index
-                        if (material_grid[x,y]!=0): # if is allowed to be replaced
+                        if (material_grid[x][y]!=0): # if is allowed to be replaced
                             heat_simulation_on(x,y) 
         # print(indexgrid)
         grid = np.copy(new_grid)  # Mettez à jour la grille d'origine avec les nouvelles valeurs
