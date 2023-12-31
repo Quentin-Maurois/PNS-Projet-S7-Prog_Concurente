@@ -78,7 +78,7 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 ### Avec GIL :
 
-| Temps  | Facteur d’accélération | Efficacité   |
+|        | Temps  | Facteur d’accélération | Efficacité   |
 | ------ | ---------------------- | ------------ | ------ |
 | Démo 0 | 7.3907976150512695     | 0,8688072861 | 10,86% |
 | Démo 1 | 7.702845811843872      | 0,8311743531 | 10,39% |
@@ -88,7 +88,7 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 ### Sans GIL :
 
-| Temps  | Facteur d’accélération | Efficacité   |
+|        | Temps  | Facteur d’accélération | Efficacité   |
 | ------ | ---------------------- | ------------ | ----- |
 | Démo 0 | 12.786301612854004     | 0,5021920343 | 6,28% |
 | Démo 1 | 12.763670444488525     | 0,501611814  | 6,27% |
@@ -100,7 +100,7 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 ### Avec GIL :
 
-| Temps  | Facteur d’accélération | Efficacité   |
+|        | Temps | Facteur d’accélération | Efficacité   |
 | ------ | ---------------------- | ------------ | ------ |
 | Démo 0 | 6.60429310798645       | 0,9722734459 | 12,15% |
 | Démo 1 | 6.7815327644348145     | 0,9440945148 | 11,80% |
@@ -110,7 +110,7 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 ### Sans GIL :
 
-| Temps  | Facteur d’accélération | Efficacité   |
+|        | Temps  | Facteur d’accélération | Efficacité   |
 | ------ | ---------------------- | ------------ | ----- |
 | Démo 0 | 12.529444694519043     | 0,5124871033 | 6,41% |
 | Démo 1 | 12.853105783462524     | 0,4981214652 | 6,23% |
