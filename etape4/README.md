@@ -64,16 +64,16 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 
 # Analyse des résultats
 
-### Résultats de la premiere étape (temps d'exécution):
+### Résultats de la premiere étape : séquencielle (temps d'exécution):
 |||
-|---|---|
-| demo 0 | 7.258728504180908 |
-| demo 1 | 7.686929941177368 |
-| demo 2 | 10.299062252044678 |
-| demo 3 | 20.986248016357422 |
-| demo 4 | 97.18011999130249 |
+|---|--|
+| demo 0 | 6.421178817749023 |
+| demo 1 | 6.402407884597778 |
+| demo 2 | 6.776578903198242 |
+| demo 3 | 8.27846622467041 |
+| demo 4 | 13.312830209732056 |
 
-### Résultats de la seconde étape (temps d'exécution):
+### Résultats de la seconde étape : à grain fin (temps d'exécution):
 #### Avec GIL :
 | Temps | Facteur d’accélération | Efficacité   |
 |---|---|--------------|
@@ -92,7 +92,7 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 | Démo 3 | 17.85131049156189 | 0,4637455737 | 5,80% |
 | Démo 4 | 41.5448956489563 | 0,3204444253 | 4,01% |
 
-### Résultats de la troisième étape sans GIL (temps d'exécution):
+### Résultats de la troisième étape : à gros grain où le nombre de thread correspond au nombre de coeurs de la machine (temps d'exécution):
 #### Avec GIL :
 | Temps | Facteur d’accélération | Efficacité |
 |---|---|---|
@@ -111,42 +111,18 @@ Ces scripts ouvrent une connexion locale qui permet au container d'accéder au s
 | Démo 3 | 16.135576963424683 | 0,513056722 | 6,41% |
 | Démo 4 | 31.427582025527954 | 0,4236033876 | 5,30% |
 
-Nous pouvons remarque que sur de petites grille tout faire séquentiellement est plus rapide que de créer un thread par cases de notre tableaux. Cela s'explique par le fait que créer un thread est plus cher que ce qu'il permet de gagner en temps.
+Nous pouvons remarquer que la méthode séquencielle est toujours la plus rapide peu importe la taille de grille des démos ou de l'utilisation de GIL ou non.
 
-Néanmoins nous pouvons voir que sur de plus grande grille, avoir multiplié le nombre de thread permet de gagner du temps malgrés leurs coup initial de creation.
+Nous pouvons remarquer que lorsque l'on utilise pas le GIL sur des grilles de petite taille le code est est quasiment deux fois plus lent qu'avec GIL.
+La tendence s'inverse d'autant plus que la grille est grande. 
 
-### speedup
+Il est possible que le fait que la méthode séquencielle soit plus rapide s'explique par le fait que l'opération effectuée dans les threads de mettre à jour la cellule soit en réalité une action très rapide et efficace en elle même. Le fait de créer et organiser des threads autour ne fait que ralentir la méthode. Comme nous l'avons vu en cours, plus une méthode est rapide et moins un tread y étant affecté est efficace.
 
-- demo 0
-  > 0.550355659
-- demo 1
-  > 0.584950755
-- demo 2
-  > 0.746952686
-- demo 3
-  > 1.082769542
-- demo 4
-  > 2.086069271
+Dans la partie multithreadée maintenant : l'utilisation ou non de GIL dépends de la taille de la grille car plus la grille est petite et plus GIL ralentis le processus. Cela est sûrement dû à la façon dont GIL est implémenté qui permet de gérer efficacement ce genre de problèmes (création de threads et affection de la fonction). En revance on voit bien que désactiver GIL sur des grandes grilles permet une nette amélioration bien que ce soit plus lent qu'en séquenciel comme vu plus haut.
 
-### Efficacité
+Encore dans la partie multithreadée : le fait de limiter et gérer en fonction les threads au coeurs effectifs de la machine permet avec et sans GIL d'améliorer la vitesse d'execution sur toutes les démos effectuées. Encore une fois GIL est plus rapide avec des petites grilles et plus lent sur les grandes grilles.
 
-- demo 0
-  > 0.550355659 / 25 = 0.022014226
-- demo 1
-  > 0.584950755 / 100 = 0.005849508
-- demo 2
-  > 0.746952686 / 625 = 0.001195124
-- demo 3
-  > 1.082769542 / 2500 = 0.000433108
-- demo 4
-  > 2.086069271 / 10000 = 0.000208607
-
-Nous pouvons remarquer que les résultats que nous avons obtenu sont très bas et ne cessent de diminuer lorsque la taille de la grille augmente.
-
-Un si grand nombre de thread n'est pas efficace car il n'y a pas assez de coeur qui permettent de paralleliser le traitement
-Cela explique pourquoi on observe une baisse d'efficacite de chacun de nos thread.
-
-
+### Explication de code
 
 Voici une vision simplifiée de nos codes avec du pseudo code. La partie de mise à jour des cellules n'est pas décomposée car il n'est pas nécessaire de le faire. En effet elle est toujours la même au travers de tous les codes et c'est seulement la façon de l'appeler qui est différentes entre les codes.
 
